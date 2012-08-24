@@ -1,9 +1,9 @@
 === Seattle WordPress Functionality === 
-Contributors: wpseattle, blobaugh, jaffe75
+Contributors: wpseattle, blobaugh, jaffe75, awoods
 Tags: seattle, functionality
 Requires at least: 3.0
-Tested up to: 3.4
-Stable Tag: trunk
+Tested up to: 3.4.1
+Stable Tag: 0.7
 License: GPLv2
 License URI: http://www.opensource.org/licenses/GPL-2.0
 
@@ -22,5 +22,10 @@ of functionality that has been deemed useful by the Seattle WordPress community.
 
 == Changelog ==
 
+= 0.7 =
+* Added UI under Settings menu
+* Added several theme options
+
 = 0.1 = 
 * First version.
+
