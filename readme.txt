@@ -1,9 +1,9 @@
 === Seattle WordPress Functionality === 
-Contributors: wpseattle, blobaugh, jaffe75, awoods
+Contributors: wpseattle, blobaugh, jaffe75
 Tags: seattle, functionality
 Requires at least: 3.0
-Tested up to: 3.4.1
-Stable Tag: 0.7
+Tested up to: 3.4
+Stable Tag: trunk
 License: GPLv2
 License URI: http://www.opensource.org/licenses/GPL-2.0
 
