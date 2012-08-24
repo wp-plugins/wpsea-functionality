@@ -1,9 +1,9 @@
 <?php
 /*
-Plugin Name: WPSea Awesome
+Plugin Name: WP Seattle Functionality
 Description: Functionality plugin for code/settings commonly use in the Seattle WordPress community. Provides Functionality this is common to most sites: Google Analytics, No wordpress update nag, Support Information Dashboard Widget
-Contributors: wpseattle, blobaugh, jaffe75, andrewwoods
-Version: 0.1
+Contributors: wpseattle, blobaugh, jaffe75, awoods
+Version: 0.7
 Author: WordPress Seattle
 Author URI: http://www.meetup.com/SeattleWordPressMeetup/
 
@@ -112,8 +112,8 @@ function wpsea_func_get_settings() {
 
 	// put together the output array  
 	$output['mlse_option_name']   = ''; // the option name as used in get_option().  
-	$output['mlse_page_title']    = __( 'Site Essentials', WPSEA_FUNC_TEXT_DOMAIN );
-	$output['mlse_author_name']   = __( 'Mastodon Labs', WPSEA_FUNC_TEXT_DOMAIN );
+	$output['mlse_page_title']    = __( 'WP Seattle Functionality', WPSEA_FUNC_TEXT_DOMAIN );
+	$output['mlse_author_name']   = __( 'Andrew Woods', WPSEA_FUNC_TEXT_DOMAIN );
 	$output['mlse_author_email']  = __( 'andrew@mastodonlabs.com', WPSEA_FUNC_TEXT_DOMAIN );
 	$output['mlse_page_sections'] = wpsea_func_page_sections();   
 
