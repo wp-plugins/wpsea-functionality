@@ -22,5 +22,10 @@ of functionality that has been deemed useful by the Seattle WordPress community.
 
 == Changelog ==
 
+= 0.7 =
+* Added UI under Settings menu
+* Added several theme options
+
 = 0.1 = 
 * First version.
+
