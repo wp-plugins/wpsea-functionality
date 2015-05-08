@@ -1,12 +1,14 @@
 <?php
 /*
 Plugin Name: WP Seattle Functionality
+Plugin URI: https://wordpress.org/plugins/wpsea-functionality/
 Description: Functionality plugin for code/settings commonly use in the Seattle WordPress community. Provides Functionality this is common to most sites: Google Analytics, No wordpress update nag, Support Information Dashboard Widget
-Contributors: wpseattle, blobaugh, jaffe75, awoods
-Version: 0.7.4
-Author: WordPress Seattle
-Author URI: http://www.meetup.com/SeattleWordPressMeetup/
-License: GPLv2
+Version: 0.8.0
+Author: Andrew Woods
+Author URI: http://andrewwoods.net
+Text Domain: wpsea-func
+Network: false
+License: GPL2
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -29,7 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //---------------------------------
 define( 'WPSEA_FUNC_PLUGIN_DIR', trailingslashit( dirname( __FILE__) ) );
 define( 'WPSEA_FUNC_TEXT_DOMAIN', 'wpsea-func' );
-define( 'WPSEA_FUNC_VERSION', '0.7.4' );
+define( 'WPSEA_FUNC_VERSION', '0.8.0' );
 define( 'WPSEA_FUNC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
 
 
@@ -56,7 +58,6 @@ if ( get_option( 'wpsea_func_rsd_enabled' ) == 'no' ) {
 register_activation_hook( __FILE__, 'wpsea_func_setup' );
 register_uninstall_hook( __FILE__, 'wpsea_func_teardown' );
 
-add_action( 'init', 'wpsea_func_load_jquery' );
 
 add_action( 'plugins_loaded', 'wpsea_func_init' );
 
@@ -87,8 +88,6 @@ function wpsea_func_setup() {
 	add_option( 'wpsea_func_analytics_id' );
 	add_option( 'wpsea_func_analytics_enabled', 'yes' );
 	add_option( 'wpsea_func_noframes_enabled', 'no' );
-	add_option( 'wpsea_func_load_jquery', 'no' );
-	add_option( 'wpsea_func_googles_jquery', 'no' );
 }
 
 function wpsea_func_teardown() {
@@ -99,8 +98,6 @@ function wpsea_func_teardown() {
 	delete_option( 'wpsea_func_analytics_id' );
 	delete_option( 'wpsea_func_analytics_enabled' );
 	delete_option( 'wpsea_func_noframes_enabled' );
-	delete_option( 'wpsea_func_load_jquery' );
-	delete_option( 'wpsea_func_googles_jquery' );
 }
 
 function wpsea_func_modify_menu() {
@@ -222,10 +219,6 @@ function wpsea_func_admin_init() {
 		'wpsea_func_setting_jquery_enabled'
 	);
 
-	register_setting(
-		'javascript_section',
-		'wpsea_func_googles_jquery'
-	);
 
 	register_setting(
 		'wpsea_func_main',
@@ -296,13 +289,6 @@ function wpsea_func_admin_init() {
 		'javascript_section' // The section of the settings page in which to show the box
 	);
 
-	add_settings_field(
-		'wpsea_func_googles_jquery', // string used in the 'id' attribute of tags
-		'Use Googles jQuery instead',  // Title of the Field
-		'wpsea_func_setting_googles_jquery', // function that renders the field
-		'wpsea_func', // the type of settings page on which to show the field
-		'javascript_section' // The section of the settings page in which to show the box
-	);
 
 	add_settings_field(
 		'wpsea_func_contact_sendto', // string used in the 'id' attribute of tags
@@ -345,8 +331,7 @@ function wpsea_func_javascript_callback() {
 ?>
 	<p>
 		<strong>jQuery</strong> can be turned on. Without any other settings,
-		jquery will be loaded from Wordpress' core.  As an option, you can
-		choose to <strong>load jQuery from Google's CDN</strong>.
+		jquery will be loaded from Wordpress' core.
 		<strong>'No Frames'</strong> is an option that detects
 		when your website has been loaded into a frameset. When enabled, it
 		will break your site out of the frameset, so that your website will
@@ -619,38 +604,6 @@ function wpsea_func_setting_jquery_enabled() {
 	}
 }
 
-/**
- * Render the Use Googles JQuery field
- *
- * @since 0.7
- *
- * @param  wp_option $wpsea_func_googles_jquery
- * @return void
-*/
-function wpsea_func_setting_googles_jquery() {
-
-	$use_googles_jquery = get_option( 'wpsea_func_googles_jquery' );
-
-	if ( $use_googles_jquery == 'yes' ) {
-		?>
-		<input type="radio" id="wpsea_func_googles_jquery_yes" 
-		name="wpsea_func_googles_jquery" value="yes" checked="checked" />
-		<label for="wpsea_func_googles_jquery_yes">Yes</label>
-		<input type="radio" id="wpsea_func_googles_jquery_no"  
-		name="wpsea_func_googles_jquery" value="no"/>
-		<label for="wpsea_func_googles_jquery_no">No</label>
-	<?php
-	} else {
-	?>
-		<input type="radio" id="wpsea_func_googles_jquery_yes" 
-		name="wpsea_func_googles_jquery" value="yes"/>
-		<label for="wpsea_func_googles_jquery_yes">Yes</label>
-		<input type="radio" id="wpsea_func_googles_jquery_no"  
-		name="wpsea_func_googles_jquery" value="no" checked="checked" />
-		<label for="wpsea_func_googles_jquery_no">No</label>
-	<?php
-	}
-}
 
 /**
  * Render the No Frames field for the Settings page
@@ -771,7 +724,6 @@ function wpsea_func_options_page() {
 		update_option( 'wpsea_func_analytics_enabled', $_POST['wpsea_func_analytics_enabled'] );
 		update_option( 'wpsea_func_noframes_enabled', $_POST['wpsea_func_noframes_enabled'] );
 		update_option( 'wpsea_func_load_jquery_enabled', $_POST['wpsea_func_load_jquery_enabled'] );
-		update_option( 'wpsea_func_googles_jquery', $_POST['wpsea_func_googles_jquery'] );
 		update_option( 'wpsea_func_contact_sendto', $_POST['wpsea_func_contact_sendto'] );
 
 		$check = array();
@@ -815,36 +767,6 @@ function wpsea_func_options_page() {
 	<?php
 }
 
-/**
- * determine which source of jquery to load
- *
- * JQuery can be loaded from WordPress core or from Google's CDN.
- * The value is determined by the Settings page for this plugin.
- *
- * @since 0.1
- *
- * @param  wp_option $wpsea_func_googles_jquery
- * @return void
-*/
-function wpsea_func_load_jquery() {
-	$use_jquery = get_option( 'wpsea_func_load_jquery_enabled' );
-	$use_googles_jquery = get_option( 'wpsea_func_googles_jquery' );
-
-	if ( $use_jquery == 'yes' ){
-
-		if ( $use_googles_jquery == 'yes' ){
-			$google_js_url = 'http://ajax.googleapis.com/ajax/libs/jquery/1.4.3/jquery.min.js';
-
-			wp_deregister_script( 'jquery' );
-			wp_register_script( 'jquery', $google_js_url );
-
-		} else {
-			// load standard query
-			wp_enqueue_script( 'jquery' );
-		} 
-
-	}
-}
 
 /**
  * Attach site_essential.js to the html page
@@ -1172,15 +1094,18 @@ function wpsea_func_form_thank_you( $message = false ) {
  * @return array $errors it does something
 */
 function wpsea_func_form_validate( $data ) {
+	require_once "lib/class-wpsea-regex.php";
+
 	$errors = array();
+	$re = new Wpsea_Regex();
 
-	$name_regex      = '/^[a-zA-Z0-9]+[\s[a-zA-Z0-9\.\-,]+]{0,4}$/';
-	$subject_regex   = '/^[a-zA-Z0-9]+[\s[a-zA-Z0-9\.\-\@\$:\?\,]+]{0,}$/';
-	$message_regex   = '/^[a-zA-Z0-9]+[\s[a-zA-Z0-9\.\-\@\$:\?\,\+\_\=]+]{0,}$/';
-	$empty_regex     = '/^\s*$/';
-	$analytics_regex = '/UA\-\d{4,10}\-\d{1,2}/';
+	$name_regex      = $re->get_name_regex();
+	$subject_regex   = $re->get_subject_regex();
+	$message_regex   = $re->get_message_regex();
+	$empty_regex     = $re->get_empty_regex();
+	$analytics_regex = $re->get_analytics_regex();
 
-	if ( isset( $data['send_to'] ) ) {
+	if ( ! empty( $data['send_to'] ) ) {
 		if ( ! is_email( $data['send_to'] ) ) {
 			$errors['send_to'] = __(
 				'Sorry. "' . $data['send_to']
@@ -1268,7 +1193,7 @@ function wpsea_func_form_validate( $data ) {
  *
  * @param bool $use_url Determine if you want a url or a directory
  * @return String $file full file system path
-*/
+ */
 function wpsea_func_get_filename( $use_url = false ) {
 	$filename = 'site_essential.js';
 
@@ -1285,6 +1210,21 @@ function wpsea_func_get_filename( $use_url = false ) {
 //   WIDGETS
 //---------------------------------
 
+function wpsea_popular_posts_sql($limit_count = 10){
+	global $wpdb;
+
+	$limit_count = intval( $limit_count );
+
+	$popular = $wpdb->get_results(
+		'SELECT id, post_title, comment_count '
+		.' FROM ' . $wpdb->prefix . 'posts'
+		." WHERE post_type='post' ORDER BY comment_count DESC LIMIT " . $limit_count
+	);
+
+	return $popular;
+}
+
+
 /**
  * display a widget of the most popular posts
  *
@@ -1292,28 +1232,21 @@ function wpsea_func_get_filename( $use_url = false ) {
  *
  * @param  array $args
  * @return void
-*/
+ */
 function wpsea_func_widget_popular_posts( $args ) {
 
-	global $wpdb;
+	$popular = wpsea_popular_posts_sql();
 
-	extract( $args );
-	echo $before_widget;
-	echo $before_title;?>Popular Posts<?php echo $after_title;
-
-	$pop = $wpdb->get_results(
-		'SELECT id, post_title, comment_count '
-		.' FROM ' . $wpdb->prefix . 'posts'
-		." WHERE post_type='post' ORDER BY comment_count DESC LIMIT 10"
-	);
+	echo $args['before_widget'];
+	echo $args['before_title'];?>Popular Posts<?php echo $args['after_title'];
 
 	echo '<ul>';
-	foreach( $pop as $post ) :
+	foreach( $popular as $post ) :
 		$post_link = get_permalink( $post->id );
 		echo ' <li><a href="' . $post_link .'">' . $post->post_title .  '</a></li>';
 	endforeach;
 	echo '</ul>';
-	echo $after_widget;
+	echo $args['after_widget'];
 }
 
 
@@ -1324,31 +1257,32 @@ function wpsea_func_widget_popular_posts( $args ) {
  *
  * @param  array $args
  * @return void
-*/
+ */
 function wpsea_func_widget_latest_post( $args ) {
+	global $wpdb;
 
-  global $wpdb;
+	echo $args['before_widget'];
+	echo $args['before_title'];?>Latest Post<?php echo $args['after_title'];
 
-  extract( $args );
-  echo $before_widget;
-  echo $before_title;?>Latest Post<?php echo $after_title;
+	$query_args = array( 'posts_per_page' => 1, 'post_status' => 'publish' );
+	$latest = new WP_Query( $query_args );
 
-	wp_reset_query();
-	query_posts( 'posts_per_page=1' );
-	if ( have_posts() ) :
+	if ( $latest->have_posts() ) :
 		echo '<ul>';
-		while ( have_posts() ) : the_post( );
-			$post_link = get_permalink( $post->id );
+		while ( $latest->have_posts() ) : $latest->the_post();
+			$post_link = get_the_permalink();
 			?><li><a href="<?php echo $post_link; ?>"><?php the_title(); ?></a></li>
 		<?php
 		endwhile;
 		echo '</ul>';
+		wp_reset_postdata();
+
 	else : ?>
 		<p>stay tuned for the next post</p>
 	<?php
 	endif;
 
-  echo $after_widget;
+	echo $args['after_widget'];
 }
 
 

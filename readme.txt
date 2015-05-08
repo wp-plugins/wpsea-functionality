@@ -1,9 +1,9 @@
 === Seattle WordPress Functionality === 
-Contributors: wpseattle, blobaugh, jaffe75, awoods
+Contributors: awoods
 Tags: widget, shortcode, google, analytics, meta
 Requires at least: 3.0
-Tested up to: 3.4.1
-Stable Tag: 0.7.4
+Tested up to: 4.1.0
+Stable Tag: 0.8.0
 License: GPLv2
 License URI: http://www.opensource.org/licenses/GPL-2.0
 
@@ -15,7 +15,6 @@ A functionality plugin is one that provides a common set of functionality that i
 used across a wide range of WordPress based websites. This plugin contains a set 
 of functionality that has been deemed useful by the Seattle WordPress community.
 
-* Load jquery easily - from your site or Google's CDN
 * Contact Form shortcode
 * Popular posts widget
 * Random post widget
@@ -27,6 +26,10 @@ of functionality that has been deemed useful by the Seattle WordPress community.
 1. Activate the "WPSea Functionality" plugin through the 'Plugins' menu in WordPress
 
 == Changelog ==
+
+= 0.8.0 =
+* Removed ability to override WordPress' jQuery with Google's, because it's a bad practice and can cause instability.
+
 
 = 0.7.4 =
 * Added setting to Hide meta generator from wp_head (radio)
