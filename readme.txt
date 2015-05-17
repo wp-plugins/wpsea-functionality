@@ -27,6 +27,12 @@ of functionality that has been deemed useful by the Seattle WordPress community.
 
 == Changelog ==
 
+= 0.8.2 =
+* Fix missing site_essential.js
+* Replaced deprecated get_bloginfo parameter 'siteurl' with current value 'url'.
+* Replaced inline CSS error styles with class names to give designers control.
+
+
 = 0.8.0 =
 * Removed ability to override WordPress' jQuery with Google's, because it's a bad practice and can cause instability.
 

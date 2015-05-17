@@ -3,7 +3,7 @@
 Plugin Name: WP Seattle Functionality
 Plugin URI: https://wordpress.org/plugins/wpsea-functionality/
 Description: Functionality plugin for code/settings commonly use in the Seattle WordPress community. Provides Functionality this is common to most sites: Google Analytics, No wordpress update nag, Support Information Dashboard Widget
-Version: 0.8.0
+Version: 0.8.2
 Author: Andrew Woods
 Author URI: http://andrewwoods.net
 Text Domain: wpsea-func
@@ -31,8 +31,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //---------------------------------
 define( 'WPSEA_FUNC_PLUGIN_DIR', trailingslashit( dirname( __FILE__) ) );
 define( 'WPSEA_FUNC_TEXT_DOMAIN', 'wpsea-func' );
-define( 'WPSEA_FUNC_VERSION', '0.8.0' );
+define( 'WPSEA_FUNC_VERSION', '0.8.2' );
 define( 'WPSEA_FUNC_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
+
+if ( ! defined('EOL_CR') ) {
+	define('EOL_CR', "\r");
+}
+if ( ! defined('EOL_LF') ) {
+	define('EOL_LF', "\n");
+}
+
+if ( ! defined('EOL_CRLF') ) {
+	define('EOL_CRLF', "\r\n");
+}
 
 
 //---------------------------------
@@ -58,8 +69,6 @@ if ( get_option( 'wpsea_func_rsd_enabled' ) == 'no' ) {
 register_activation_hook( __FILE__, 'wpsea_func_setup' );
 register_uninstall_hook( __FILE__, 'wpsea_func_teardown' );
 
-
-add_action( 'plugins_loaded', 'wpsea_func_init' );
 
 add_action( 'wp_enqueue_scripts', 'wpsea_func_load_js' );
 
@@ -383,9 +392,9 @@ function wpsea_func_shortcode_callback() {
 function wpsea_func_widget_callback() {
 ?>
 	<p>
-		There are 2 <a href="<?php echo admin_url('widgets.php'); ?>">widgets</a> 
-		that come with this module - <strong>Essential Popular Posts</strong>, 
-		and <strong>Essential Latest Post</strong>
+		There are 2 <a href="<?php echo admin_url('widgets.php'); ?>">widgets</a>
+		that come with this module - <strong>Popular Posts</strong>,
+		and <strong>Latest Posts</strong>
 	</p>
 <?php
 }
@@ -627,7 +636,6 @@ function wpsea_func_setting_noframes_enabled() {
 		<label for="wpsea_func_noframes_enabled_no">No</label>
 		<?php
 
-		wpsea_func_noframes_append();
 	} else {
 	?>
 		<input type="radio" id="wpsea_func_noframes_enabled_yes" 
@@ -666,13 +674,13 @@ function wpsea_func_noframes_append() {
 
 	$filename = wpsea_func_get_filename();
 
-	$home_url = get_bloginfo( 'siteurl' );
+	$home_url = get_bloginfo( 'url' );
 
 	try {
-		error_log( 'opening file for appending' . $filename );
+		error_log( 'opening file for appending filename=' . $filename );
 		$fh = fopen( $filename, 'a+' );
 	} catch (Exception $e) {
-		error_log("RAT FARTS! e=" . $e->getMessage() );
+		error_log("Tried to open the file but couldnt! " . $e->getMessage() );
 	}
 	if ( ! $fh ){
 		die( 'Cannot write filename=' . $filename );
@@ -704,12 +712,42 @@ function wpsea_func_noframes_append() {
 }
 
 /**
+ * Delete the JS file
+ *
+ * @since 0.8.2
+ *
+ * @return boolean
+ */
+function remove_js_file() {
+
+	$js_file = wpsea_func_get_filename();
+	if ( file_exists( $js_file ) ){
+		if ( WP_DEBUG ){
+			error_log('removing JS file. name=' . $js_file);
+		}
+
+		$deleted = unlink( $js_file );
+		if ( WP_DEBUG ) {
+			if ( $deleted ) {
+				error_log( 'successfully deleted file=' . $js_file );
+			} else {
+				error_log( 'could not delete file=' . $js_file );
+			}
+		}
+		return $deleted;
+	}
+
+}
+
+
+
+/**
  * Render the Form for the Options page
  *
  * @since 0.1
  *
  * @return void
-*/
+ */
 function wpsea_func_options_page() {
 	$_settings = wpsea_func_get_settings();
 	$errors = array();
@@ -732,25 +770,26 @@ function wpsea_func_options_page() {
 
 		$errors = wpsea_func_form_validate( $check );
 
-		// delete the current file if exists. Creating/Appending the file will be done
-		// by other functions.
-		$js_file = wpsea_func_get_filename();
-		if ( file_exists($js_file) ){
-			error_log('removing JS file' . $js_file);
-			unlink( $js_file );
+		remove_js_file();
+		if ( 'yes' === $_POST['wpsea_func_noframes_enabled'] ) {
+			error_log( 'REGENERATE!' );
+
+			// Check for items that write to the JS.
+			// Need to ensure that the JS file exists before enqueueing
+			wpsea_func_noframes_append();
 		}
 	}
 
 	?>
 	<div class="wrap">
 		<h2><?php echo $_settings['wpsea_func_page_title']; ?></h2>
-		<div>Send any plugin issues to <?php echo $_settings['wpsea_func_author_name']; ?></div>
+		<div>This plugin helps you manage the small, common aspects of your website. </div>
 		<?php if ( $errors ){
 			?>
-			<div style="color: red; font-size: 18px; ">
+			<div class="errors-list">
 			<?php
 			foreach ( $errors AS $error_field => $error_message ){
-				echo '<span style="">' .  $error_message . '</span><br />';
+				echo '<div class="error-messsage">' .  $error_message . '</div><br />';
 			}
 			?>
 			</div>
@@ -760,7 +799,7 @@ function wpsea_func_options_page() {
 			settings_fields( 'wpsea_func_options' );
 			do_settings_sections( 'wpsea_func' );
 			?>
-			<input type="submit" name="wpsea_func_submit_button"
+			<input type="submit" class="button-primary" name="wpsea_func_submit_button"
 			value="Save Changes" id="wpsea_func_submit_button">
 		</form>
 	</div>
@@ -776,22 +815,21 @@ function wpsea_func_options_page() {
 function wpsea_func_load_js() {
 	$in_footer    = false;
 
-	try {
-		$essential_js =  WPSEA_FUNC_PLUGIN_URL . 'js/site_essential.js';
-	} catch (Exception $e) {
-		error_log("Exception occurred getting filename! " . $e->getMessage() );
-	}
+	$essential_js_url  = wpsea_func_get_filename(true);
+	$essential_js_file = wpsea_func_get_filename();
 
 	$dependencies = array();
 
-	wp_enqueue_script(
-		'wpsea_func_main',
-		$essential_js,
-		$dependencies,
-		WPSEA_FUNC_VERSION,
-		$in_footer
-	);
-	
+	$noframes_enabled = get_option( 'wpsea_func_noframes_enabled' );
+	if ( file_exists( $essential_js_file ) ) {
+		wp_enqueue_script(
+			'wpsea_func_main',
+			$essential_js_url,
+			$dependencies,
+			WPSEA_FUNC_VERSION,
+			$in_footer
+		);
+	}
 }
 
 /**
@@ -1032,18 +1070,28 @@ function wpsea_func_contactform_submit( $send_to = false ) {
 			$from_address = wpsea_func_from_address();
 
 			$subject = $data['subject'];
-			$message = $data['message'] . "\n\n" . $data['sender_name'];
+			$message = wordwrap($data['message'], 70, EOL_CR)
+			. EOL_CR
+			. EOL_CR
+			. $data['sender_name'];
 
 			if ( isset( $data['sender_email'] ) ) {
 				$from_address = $data['sender_email'];
 
-				$headers  = 'From: ' . $from_address . "\r\n";
-				$headers .= 'Reply-To: '  . $data['sender_email']  . "\r\n";
+				$headers  = 'From: ' . $from_address . EOL_CRLF;
+				$headers .= 'Reply-To: '  . $data['sender_email']  . EOL_CRLF;
 			}
 
 			$headers .= 'X-Mailer: PHP/' . phpversion();
 
-			mail( $to_address, $subject, $message, $headers );
+			$sent = mail( $to_address, $subject, $message, $headers );
+			if ( ! $sent ){
+				error_log('mail to ' . $to_address . ' was NOT SENT!');
+			} else {
+				if ( WP_DEBUG ) {
+					error_log('mail to ' . $to_address . ' SENT!');
+				}
+			}
 
 			if ( isset( $data['redirect_to'] ) ){
 				wp_redirect( $data['redirect_to'] );
@@ -1198,11 +1246,17 @@ function wpsea_func_get_filename( $use_url = false ) {
 	$filename = 'site_essential.js';
 
 	if ( $use_url ){
-		error_log( 'use_url=true filename=' . $filename );
-		return plugins_url( $filename );
+		$url =  WPSEA_FUNC_PLUGIN_URL . $filename;
+		if ( WP_DEBUG ){
+			error_log( 'use_url=true url=' . $url );
+		}
+		return $url;
 	} else {
-		error_log( 'use_url=false filename=' . $filename );
-		return WPSEA_FUNC_PLUGIN_DIR . $filename;
+		$file =  WPSEA_FUNC_PLUGIN_DIR  . $filename ;
+		if ( WP_DEBUG ){
+			error_log( 'use_url=false file=' . $file );
+		}
+		return $file;
 	}
 }
 
@@ -1308,6 +1362,18 @@ interface DashboardWidget {
 	function update( $new_instance, $old_instance );
 	function form( $instance );
 }
+
+
+require_once "lib/widget.popular-posts.php";
+require_once "lib/widget.latest-posts.php";
+
+function wpsea_register_widgets() {
+		register_widget( 'WpseaPopularPosts' );
+		register_widget( 'WpseaLatestPosts' );
+}
+
+add_action( 'widgets_init', 'wpsea_register_widgets' );
+
 
 //=================================================================
 //						   END OF PLUGIN
